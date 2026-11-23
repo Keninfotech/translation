@@ -119,26 +119,28 @@ class Engine:
         return self._asr
 
     def transcribe(self, data: bytes, lang: str) -> str:
-        """Decodes arbitrary audio bytes and executes speech-to-text."""
+        """Decodes arbitrary audio bytes and executes high-accuracy speech-to-text with Large-v3-Turbo."""
         if lang not in LANGS:
             raise ValueError(f"Unsupported source language: {lang}")
 
-        # 1. Decode arbitrary audio into 16kHz mono float32
+        # 1. Decode arbitrary audio into 16kHz mono float32 with auto-gain
         audio = decode_audio_bytes(data, target_sr=16000)
 
         # 2. Validate audio length and check for silence
         validate_audio(audio, min_duration=0.2, max_duration=120.0, sr=16000)
 
-        # 3. Whisper transcription with VAD filtering
+        # 3. Whisper Large-v3-Turbo transcription with optimal decoding parameters
         asr_model = self.asr()
-        # English code is 'en'; Indic languages map to standard 2-letter codes for whisper
-        whisper_lang = lang if lang != 'or' else 'ne'  # whisper fallback for Odia
+        whisper_lang = lang if lang not in ('or', 'pa') else None
         segments, _ = asr_model.transcribe(
             audio.astype(np.float32),
             language=whisper_lang,
             vad_filter=True,
-            beam_size=2,
-            temperature=0.0
+            vad_parameters=dict(min_silence_duration_ms=400),
+            beam_size=5,
+            best_of=5,
+            temperature=0.0,
+            condition_on_previous_text=False
         )
         return ' '.join(s.text.strip() for s in segments).strip()
 
@@ -257,9 +259,9 @@ class Engine:
 
     def synthesize(self, text: str, lang: str) -> bytes:
         """
-        Synthesizes speech to WAV bytes:
-        - Uses Piper ONNX for languages with Piper voices (en, hi, ml, te, mr, bn).
-        - Uses MMS-TTS VITS for other Indic languages (kn, ta, gu, pa, or).
+        Synthesizes high-quality speech to WAV bytes:
+        - Uses Meta MMS-TTS VITS models for natural native pronunciation across Indian languages.
+        - Falls back to Piper ONNX if available.
         """
         if lang not in LANGS:
             raise ValueError(f"Unsupported language for speech: {lang}")
@@ -268,20 +270,7 @@ class Engine:
         if not clean_text:
             raise ValueError("Speech text is empty")
 
-        voice_file = VOICES_DIR / f"{lang}.onnx"
-        voice_cfg = VOICES_DIR / f"{lang}.onnx.json"
-
-        # Strategy 1: Piper ONNX Voice
-        if voice_file.exists() and voice_cfg.exists():
-            with tempfile.TemporaryDirectory() as d:
-                outfile = Path(d) / 'speech.wav'
-                command = [PIPER_EXE, '-m', str(voice_file), '-f', str(outfile)]
-                result = subprocess.run(command, input=clean_text, text=True, capture_output=True, timeout=60, check=False)
-                if result.returncode != 0:
-                    raise RuntimeError(f"Piper synthesis failed: {result.stderr[-400:]}")
-                return outfile.read_bytes()
-
-        # Strategy 2: MMS-TTS VITS Model
+        # Strategy 1: High-Fidelity Native MMS-TTS VITS Model
         mms_dir = TTS_DIR / lang
         if mms_dir.exists():
             with self._mms_lock:
@@ -293,6 +282,18 @@ class Engine:
                 import soundfile as sf
                 sf.write(buf, waveform, samplerate=model.config.sampling_rate, format='WAV')
                 return buf.getvalue()
+
+        # Strategy 2: Piper ONNX Voice
+        voice_file = VOICES_DIR / f"{lang}.onnx"
+        voice_cfg = VOICES_DIR / f"{lang}.onnx.json"
+        if voice_file.exists() and voice_cfg.exists():
+            with tempfile.TemporaryDirectory() as d:
+                outfile = Path(d) / 'speech.wav'
+                command = [PIPER_EXE, '-m', str(voice_file), '-f', str(outfile)]
+                result = subprocess.run(command, input=clean_text, text=True, capture_output=True, timeout=60, check=False)
+                if result.returncode != 0:
+                    raise RuntimeError(f"Piper synthesis failed: {result.stderr[-400:]}")
+                return outfile.read_bytes()
 
         raise RuntimeError(f"No offline voice model found for language '{lang}'. Available voices: {self.status()['tts_voices']}")
 

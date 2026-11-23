@@ -42,7 +42,10 @@ def decode_audio_bytes(data: bytes, target_sr: int = 16000) -> np.ndarray:
 
         if frames:
             audio = np.concatenate(frames).astype(np.float32)
-            # Clip between -1.0 and 1.0
+            # Automatic audio gain normalization for microphone input
+            max_val = np.max(np.abs(audio))
+            if max_val > 0.001:
+                audio = audio / max_val * 0.95
             return np.clip(audio, -1.0, 1.0)
     except Exception as av_err:
         # Strategy 2: Fallback to SoundFile
