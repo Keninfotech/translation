@@ -1,0 +1,24 @@
+{
+  "review_terms": [
+    "BP", "blood pressure", "heart rate", "pulse", "mg", "ml", "mcg", "g", "iu",
+    "dose", "dosage", "frequency", "twice daily", "thrice daily", "once daily", "bid", "tid", "qid", "prn",
+    "insulin", "metformin", "glipizide", "warfarin", "heparin", "aspirin", "clopidogrel",
+    "epinephrine", "adrenaline", "atropine", "digoxin", "amiodarone", "nitroglycerin",
+    "penicillin", "amoxicillin", "ciprofloxacin", "azithromycin", "vancomycin",
+    "morphine", "fentanyl", "oxycodone", "tramadol", "codeine",
+    "allergy", "allergic reaction", "anaphylaxis", "contraindicated", "contraindication",
+    "adverse effect", "side effect", "toxicity", "overdose",
+    "cardiac arrest", "myocardial infarction", "heart attack", "stroke", "seizure",
+    "diabetic ketoacidosis", "hypoglycemia", "hyperglycemia", "sepsis", "shock",
+    "hemorrhage", "bleeding", "thrombosis", "embolism", "fracture", "trauma",
+    "not", "no", "never", "do not", "don't", "stop", "discontinue", "avoid", "without",
+    "nahi", "mat", "illa", "alla", "vendam", "kodukkaruth", "kazhikkaruth"
+  ],
+  "negation_terms": [
+    "not", "no", "never", "do not", "don't", "stop", "discontinue", "avoid", "without", "none",
+    "nahi", "na", "mat", "illa", "alla", "vendam", "kodukkaruth", "kazhikkaruth", "benda"
+  ],
+  "dosage_units": [
+    "mg", "mcg", "g", "ml", "iu", "units", "tablets", "capsules", "drops", "puffs", "teaspoon", "tablespoon"
+  ]
+}

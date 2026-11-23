@@ -1,0 +1,61 @@
+# Python virtual environments & packages
+.venv/
+venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+.eggs/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Model weights & binaries (keep structure & README)
+models/whisper/
+models/indictrans2/
+models/voices/
+models/tts/
+models/vad/*.onnx
+*.onnx
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# Frontend dependencies & build outputs
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+.npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+
+# Temporary audio, recordings & exports
+*.wav
+*.mp3
+*.webm
+*.ogg
+*.flac
+*.zip
+*.tar.gz
+transcript_export_*.txt
+temp/
+tmp/
+
+# IDE & OS files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+ehthumbs.db
